@@ -43,7 +43,7 @@ struct LoginResult : public DataHeader
 {
     LoginResult()
     {
-        dataLength = sizeof(Login);
+        dataLength = sizeof(LoginResult);
         cmd = CMD_LOGIN_RESULT;
         result = 0;
     }
@@ -54,7 +54,7 @@ struct Logout : public DataHeader
 {
     Logout()
     {
-        dataLength = sizeof(Login);
+        dataLength = sizeof(Logout);
         cmd = CMD_LOGOUT;
 
     }
@@ -65,7 +65,7 @@ struct LogoutResult : public DataHeader
 {
     LogoutResult()
     {
-        dataLength = sizeof(Login);
+        dataLength = sizeof(LogoutResult);
         cmd = CMD_LOGIN_RESULT;
         result = 0;
     }

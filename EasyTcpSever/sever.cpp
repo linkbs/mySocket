@@ -43,7 +43,7 @@ struct LoginResult : public DataHeader
 {
     LoginResult()
     {
-        dataLength = sizeof(Login);
+        dataLength = sizeof(LoginResult);
         cmd = CMD_LOGIN_RESULT;
         result = 0;
     }
@@ -54,7 +54,7 @@ struct Logout : public DataHeader
 {
     Logout()
     {
-        dataLength = sizeof(Login);
+        dataLength = sizeof(Logout);
         cmd = CMD_LOGOUT;
         
     }
@@ -65,7 +65,7 @@ struct LogoutResult : public DataHeader
 {
     LogoutResult()
     {
-        dataLength = sizeof(Login);
+        dataLength = sizeof(LogoutResult);
         cmd = CMD_LOGIN_RESULT;
         result = 0;
     }
@@ -123,22 +123,23 @@ int main() {
    
     while (true)
     {
-        DataHeader header = {};
+        char szRecv[1024] = {};
         //5 接收客户端的请求数据
-        int nLen = recv(_cSock, (char*)&header, sizeof(header), 0);
+        int nLen = recv(_cSock, szRecv, sizeof(DataHeader), 0);
+        DataHeader* header = (DataHeader*)szRecv;
         if (nLen <= 0) {
         
             printf("客户端已退出，任务结束");
             break;
         }
-       
-        switch (header.cmd) 
+        
+        switch (header->cmd) 
         {
         case CMD_LOGIN:
         {
-            Login login = {};
-            recv(_cSock, (char*)&login + sizeof(DataHeader), sizeof(Login) - sizeof(DataHeader), 0);
-            printf("收到命令：CMD_LOGIN 数据长度: %d  userName = %s PassWord = % s\n", login.dataLength ,login.UserName,login.PassWord);
+            recv(_cSock, szRecv + sizeof(DataHeader), header->dataLength - sizeof(DataHeader), 0);
+            Login* login = (Login*)szRecv;
+            printf("收到命令：CMD_LOGIN 数据长度: %d  userName = %s PassWord = % s\n", login->dataLength ,login->UserName,login->PassWord);
             //忽略判断用户密码是否正确的过程
             LoginResult ret;
             send(_cSock, (char*)&ret, sizeof(LoginResult), 0);
@@ -147,9 +148,9 @@ int main() {
         break;
         case CMD_LOGOUT:
         {
-            Logout logout = {};
-            recv(_cSock, (char*)&logout + sizeof(DataHeader), sizeof(logout) - sizeof(DataHeader), 0);
-            printf("收到命令:CMD_LOGIN,数据长度: %d, userName = %s \n", logout.dataLength, logout.UserName);
+            recv(_cSock, szRecv + sizeof(DataHeader),header->dataLength - sizeof(DataHeader), 0);
+            Logout *logout = (Logout*)szRecv;
+            printf("收到命令:CMD_LOGIN,数据长度: %d, userName = %s \n", logout->dataLength, logout->UserName);
             //退出登录
             LoginResult ret;
             send(_cSock, (char*)&ret, sizeof(ret), 0);
@@ -158,8 +159,7 @@ int main() {
         break;
         
         default:
-            header.cmd = CMD_ERROR;
-            header.dataLength = 0;
+            DataHeader header = { 0,CMD_ERROR };
             send(_cSock, (char*)&header, sizeof(header), 0);
         break;
         }
