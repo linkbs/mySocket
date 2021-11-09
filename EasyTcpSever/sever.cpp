@@ -7,11 +7,44 @@
 #pragma comment(lib,"ws2_32.lib")
 
 //用结构体给客户端返回消息
-struct  DataPackage
+enum CMD
 {
-    int age;
+    CMD_LOGIN,
+    CMD_LOGOUT,
+    CMD_ERROR
+};
+
+struct DataHeader
+{
+    short dataLength;
+    short cmd;
+
+};
+
+
+//DataPackage
+struct  Login
+{
+    char UserName[32];
+    char PassWord[32];
     char name[32];
 
+};
+
+struct LoginResult
+{
+    int result;
+};
+
+struct Logout {
+
+    char UserName[32];
+};
+
+struct LogoutResult
+{
+
+    int result;
 };
 
 
@@ -61,31 +94,52 @@ int main() {
     }
     printf("新客户端加入:socket = %d，IP = %s\n", (int)_cSock,inet_ntoa(clientAddr.sin_addr));
 
-    char _recvBuf[128] = {};
+   
     while (true)
     {
+        DataHeader header = {};
         //5 接收客户端的请求数据
-        int nLen = recv(_cSock, _recvBuf, 128, 0);
+        int nLen = recv(_cSock, (char*)&header, sizeof(header), 0);
         if (nLen <= 0) {
         
             printf("客户端已退出，任务结束");
             break;
         }
-        printf("收到命令:%s \n", _recvBuf);
+        printf("收到命令:%d 数据长度:%d \n", header.cmd,header.dataLength);
+        switch (header.cmd) 
+        {
+        case CMD_LOGIN:
+        {
+            Login login = {};
+            recv(_cSock, (char*)&login, sizeof(Login), 0);
+            //忽略判断用户密码是否正确的过程
+            LoginResult ret = {1};
+            send(_cSock, (char*)&header, sizeof(DataHeader), 0);
+            send(_cSock, (char*)&ret, sizeof(LoginResult), 0);
+
+        }
+        break;
+        case CMD_LOGOUT:
+        {
+            Logout logout = {};
+            recv(_cSock, (char*)&logout, sizeof(logout), 0);
+            //退出登录
+            LoginResult ret = { 1 };
+            send(_cSock, (char*)&header, sizeof(header), 0);
+            send(_cSock, (char*)&ret, sizeof(ret), 0);
+
+        }
+        break;
+        
+        default:
+            header.cmd = CMD_ERROR;
+            header.dataLength = 0;
+            send(_cSock, (char*)&header, sizeof(header), 0);
+        break;
+        }
          //6 处理请求
-        if (0 == strcmp(_recvBuf, "getInfo")) 
-        {
-            DataPackage dp = { 80, "张国容" };
-            send(_cSock, (const char*)&dp, sizeof(DataPackage), 0);
+       
         
-        }
-        else
-        {
-            char msgBuf[] = "???.";
-            send(_cSock, msgBuf, strlen(msgBuf) + 1, 0);
-        
-        }
-        //6 send 向客户端发送一条数据
 
         
 
