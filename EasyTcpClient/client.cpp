@@ -7,45 +7,72 @@
 #pragma comment(lib,"ws2_32.lib")
 
 
-enum CMD 
+enum CMD
 {
     CMD_LOGIN,
+    CMD_LOGIN_RESULT,
     CMD_LOGOUT,
+    CMD_LOGOUT_RESULT,
     CMD_ERROR
 };
 
 struct DataHeader
 {
-    short dataLength; 
+    short dataLength;
     short cmd;
 
 };
 
 
 //DataPackage
-struct  Login
+struct  Login : public DataHeader
 {
+    Login()
+    {
+        dataLength = sizeof(Login);
+        cmd = CMD_LOGIN;
+
+    }
     char UserName[32];
     char PassWord[32];
     char name[32];
 
 };
 
-struct LoginResult
+struct LoginResult : public DataHeader
 {
+    LoginResult()
+    {
+        dataLength = sizeof(Login);
+        cmd = CMD_LOGIN_RESULT;
+        result = 0;
+    }
     int result;
 };
 
-struct Logout {
+struct Logout : public DataHeader
+{
+    Logout()
+    {
+        dataLength = sizeof(Login);
+        cmd = CMD_LOGOUT;
 
+    }
     char UserName[32];
 };
 
-struct LogoutResult 
+struct LogoutResult : public DataHeader
 {
+    LogoutResult()
+    {
+        dataLength = sizeof(Login);
+        cmd = CMD_LOGIN_RESULT;
+        result = 0;
+    }
 
     int result;
 };
+
 
 int main() {
     //启动Windows socket 2.x环境
@@ -95,29 +122,24 @@ int main() {
            break;
         }
         else if(0 == strcmp(cmdBuf,"login")) {
-            Login login = { "lyd","lydmm"};
-            DataHeader dh = {sizeof(login),CMD_LOGIN};
+            Login login ;
+            strcpy(login.UserName, "lyd");
+            strcpy(login.PassWord, "lydmima");
             //5 向服务器发送亲求命令
-            send(_sock, (const char*)& dh,sizeof(dh), 0);
             send(_sock, (const char*)&login, sizeof(login), 0);
             //接收服务器返回数据
-            DataHeader retHeader = {};
             LoginResult loginRet = {};
-            recv(_sock, (char*)&retHeader, sizeof(retHeader), 0);
             recv(_sock, (char*)&loginRet, sizeof(loginRet), 0);
             printf("LoginResult: %d", loginRet.result);
         }
         else if (0 == strcmp(cmdBuf, "logout")) {
-            Logout logout = { "lyd" };
-            DataHeader dh = {sizeof(logout),CMD_LOGOUT };
+            Logout logout;
+            strcpy(logout.UserName, "lyd");
             //向服务器端发送请求命令
-            send(_sock, (const char*)&dh, sizeof(dh), 0);
             send(_sock, (const char*)&logout, sizeof(logout), 0);
-            DataHeader retHeader = {};
             LogoutResult logoutRet = {};
-            recv(_sock, (char*)&retHeader, sizeof(retHeader), 0);
             recv(_sock, (char*)&logoutRet, sizeof(logoutRet), 0);
-            
+            printf("LogoutResult : %d\n", logoutRet.result);
          
         }
         else{

@@ -10,7 +10,9 @@
 enum CMD
 {
     CMD_LOGIN,
+    CMD_LOGIN_RESULT,
     CMD_LOGOUT,
+    CMD_LOGOUT_RESULT,
     CMD_ERROR
 };
 
@@ -23,26 +25,50 @@ struct DataHeader
 
 
 //DataPackage
-struct  Login
+struct  Login : public DataHeader
 {
+    Login() 
+    {
+        dataLength = sizeof(Login);
+        cmd = CMD_LOGIN;
+    
+    }
     char UserName[32];
     char PassWord[32];
     char name[32];
 
 };
 
-struct LoginResult
+struct LoginResult : public DataHeader
 {
+    LoginResult()
+    {
+        dataLength = sizeof(Login);
+        cmd = CMD_LOGIN_RESULT;
+        result = 0;
+    }
     int result;
 };
 
-struct Logout {
-
+struct Logout : public DataHeader 
+{
+    Logout()
+    {
+        dataLength = sizeof(Login);
+        cmd = CMD_LOGOUT;
+        
+    }
     char UserName[32];
 };
 
-struct LogoutResult
+struct LogoutResult : public DataHeader
 {
+    LogoutResult()
+    {
+        dataLength = sizeof(Login);
+        cmd = CMD_LOGIN_RESULT;
+        result = 0;
+    }
 
     int result;
 };
@@ -105,16 +131,16 @@ int main() {
             printf("客户端已退出，任务结束");
             break;
         }
-        printf("收到命令:%d 数据长度:%d \n", header.cmd,header.dataLength);
+       
         switch (header.cmd) 
         {
         case CMD_LOGIN:
         {
             Login login = {};
-            recv(_cSock, (char*)&login, sizeof(Login), 0);
+            recv(_cSock, (char*)&login + sizeof(DataHeader), sizeof(Login) - sizeof(DataHeader), 0);
+            printf("收到命令：CMD_LOGIN 数据长度: %d  userName = %s PassWord = % s\n", login.dataLength ,login.UserName,login.PassWord);
             //忽略判断用户密码是否正确的过程
-            LoginResult ret = {1};
-            send(_cSock, (char*)&header, sizeof(DataHeader), 0);
+            LoginResult ret;
             send(_cSock, (char*)&ret, sizeof(LoginResult), 0);
 
         }
@@ -122,10 +148,10 @@ int main() {
         case CMD_LOGOUT:
         {
             Logout logout = {};
-            recv(_cSock, (char*)&logout, sizeof(logout), 0);
+            recv(_cSock, (char*)&logout + sizeof(DataHeader), sizeof(logout) - sizeof(DataHeader), 0);
+            printf("收到命令:CMD_LOGIN,数据长度: %d, userName = %s \n", logout.dataLength, logout.UserName);
             //退出登录
-            LoginResult ret = { 1 };
-            send(_cSock, (char*)&header, sizeof(header), 0);
+            LoginResult ret;
             send(_cSock, (char*)&ret, sizeof(ret), 0);
 
         }
