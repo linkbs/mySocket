@@ -6,6 +6,15 @@
 #include <iostream>
 #pragma comment(lib,"ws2_32.lib")
 
+//用结构体给客户端返回消息
+struct  DataPackage
+{
+    int age;
+    char name[32];
+
+};
+
+
 int main() {
      //启动Windows socket 2.x环境
     WORD ver = MAKEWORD(2, 2);
@@ -64,15 +73,10 @@ int main() {
         }
         printf("收到命令:%s \n", _recvBuf);
          //6 处理请求
-        if (0 == strcmp(_recvBuf, "getName")) 
+        if (0 == strcmp(_recvBuf, "getInfo")) 
         {
-            char msgBuf[] = "xiao Qiang.";
-            send(_cSock, msgBuf, strlen(msgBuf) + 1, 0);
-        
-        }
-        else if(0 == strcmp(_recvBuf,"getAge")) {
-            char msgBuf[] = "80.";
-            send(_cSock, msgBuf, strlen(msgBuf) + 1, 0);
+            DataPackage dp = { 80, "张国容" };
+            send(_cSock, (const char*)&dp, sizeof(DataPackage), 0);
         
         }
         else

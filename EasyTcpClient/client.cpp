@@ -6,6 +6,14 @@
 #include <iostream>
 #pragma comment(lib,"ws2_32.lib")
 
+
+struct  DataPackage
+{
+    int age;
+    char name[32];
+
+};
+
 int main() {
     //启动Windows socket 2.x环境
     WORD ver = MAKEWORD(2, 2);
@@ -62,8 +70,8 @@ int main() {
         char recvBuf[128] = {};
         int nlen = recv(_sock, recvBuf, 128, 0);
         if (nlen > 0) {
-
-            printf("接收到的数据：%s\n", recvBuf);
+            DataPackage* dp = (DataPackage*)recvBuf;
+            printf("接收到的数据：年龄 = %d , 姓名 = %s\n",dp->age, dp->name);
         }
         //关闭套接字
     }
