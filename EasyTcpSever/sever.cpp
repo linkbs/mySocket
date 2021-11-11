@@ -199,10 +199,11 @@ int main() {
          
             FD_SET(g_clients[i], &fdRead);
         }
-        timeval t = {0,0};
+        timeval t = {2,0};
         //第一个参数nfds是一个整数，是指fd_set集合中所以描述符（socket）的范围
         //就是里面最大的scoket值+1,在windows中参数可以写0.
         int ret = select(_sock + 1, &fdRead, &fdWrite, &fdExp, &t);
+        //_sock有可读才会被放进fdRead
        
         if (ret < 0)
         {
@@ -223,13 +224,15 @@ int main() {
             if (INVALID_SOCKET == _cSock) {
                 printf("错误，接受到无效客户端SOCKET..\n");
             }
-            for (int i = 0;i < (int)g_clients.size();i++) {
-                NewUserJoin userJoin;
-                send(g_clients[i], (const char*)&userJoin, sizeof(NewUserJoin), 0);
-            }
-            g_clients.push_back(_cSock);
-            printf("新客户端加入:socket = %d，IP = %s\n", (int)_cSock, inet_ntoa(clientAddr.sin_addr));
+            else {
 
+                for (int i = 0;i < (int)g_clients.size();i++) {
+                    NewUserJoin userJoin;
+                    send(g_clients[i], (const char*)&userJoin, sizeof(NewUserJoin), 0);
+                }
+                g_clients.push_back(_cSock);
+                printf("新客户端加入:socket = %d，IP = %s\n", (int)_cSock, inet_ntoa(clientAddr.sin_addr));
+            }
         }
         for (int i = 0;i < (int)fdRead.fd_count;i++)
         {
