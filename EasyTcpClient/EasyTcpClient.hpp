@@ -11,13 +11,13 @@
 #else
 #include<unistd.h>
 #include<arpa/inet.h>
-#include<string>
+
 
 #define SOCKET int
 #define INVALID_SOCKET   (SOCKET)(~0)
 #define SOCKET_ERROR             (-1)
 #endif
-
+#include<string.h>
 #include <vector>
 #include <stdio.h>
 #include "MessageHeader.hpp"
