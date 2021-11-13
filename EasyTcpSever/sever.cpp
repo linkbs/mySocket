@@ -39,7 +39,6 @@ struct  Login : public DataHeader
     }
     char UserName[32];
     char PassWord[32];
-    char name[32];
 
 };
 
@@ -122,9 +121,9 @@ int processor(SOCKET _cSock)
     {
         recv(_cSock, szRecv + sizeof(DataHeader), header->dataLength - sizeof(DataHeader), 0);
         Logout* logout = (Logout*)szRecv;
-        printf("收到客户端<Scoket = %d>请求:CMD_LOGIN,数据长度: %d, userName = %s \n",_cSock , logout->dataLength, logout->UserName);
+        printf("收到客户端<Scoket = %d>请求:CMD_LOGOUT,数据长度: %d, userName = %s \n",_cSock , logout->dataLength, logout->UserName);
         //退出登录
-        LoginResult ret;
+        LogoutResult ret;
         send(_cSock, (char*)&ret, sizeof(ret), 0);
 
     }
@@ -156,7 +155,7 @@ int main() {
     
     sockaddr_in _sin = {};  //={}用来初始化一下这个结构体实例
     _sin.sin_family = AF_INET;
-    _sin.sin_port = htons(4567);
+    _sin.sin_port = htons(4568);
     _sin.sin_addr.S_un.S_addr = INADDR_ANY;
  
     if(SOCKET_ERROR == bind(_sock, (sockaddr*)&_sin, sizeof(_sin)))
