@@ -1,16 +1,18 @@
 #ifndef _EasyTcpServer_hpp_
 #define _EasyTcpSever_hpp_
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
+
 
 #ifdef _WIN32
+#define FD_SETSIZE     10000
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <WinSock2.h>
 #include <windows.h>
 
 #pragma comment(lib,"ws2_32.lib")
 #else
 #include<unistd.h>
-
+#include<arpa/inet.h>
 
 
 #define SOCKET int
@@ -21,10 +23,11 @@
 #include <vector>
 #include <stdio.h>
 #include "MessageHeader.hpp"
+#include "CELLTimestamp.hpp"
 
 //缓冲区最小单元大小
 #ifndef RECV_BUFF_SZIE
-#define RECV_BUFF_SZIE 10240
+#define RECV_BUFF_SZIE 1024
 #endif // !RECV_BUFF_SZIE
 
 
@@ -72,6 +75,8 @@ class EasyTcpServer
 private:
 	SOCKET _sock;
 	std::vector<ClientSocket*> _clients;
+	CELLTimestamp _tTime;
+	int _recvCount;
 public:
 	EasyTcpServer() {
 
@@ -160,7 +165,7 @@ public:
 			NewUserJoin userJoin;
 			SendDataAll(&userJoin);
 			_clients.push_back(new ClientSocket(cSock));
-			printf("新客户端加入:socket = %d，IP = %s\n", (int)cSock, inet_ntoa(clientAddr.sin_addr));
+			printf("socket = <%d>新客户端<%d>加入:socket = %d，IP = %s\n",(int)_sock,_clients.size(), (int)cSock, inet_ntoa(clientAddr.sin_addr));
 		}
 		return (int)cSock;
 
@@ -221,6 +226,7 @@ public:
 			{
 				FD_CLR(_sock, &fdRead);
 				Accept();
+				return true;
 				//接收客户端套接字，客户端发消息在下个循环处理
 				//只是清理计数器
 				//4 accept等待客户端连接,接收客户端的socket
@@ -294,6 +300,16 @@ public:
 	}
 	//响应网络消息
 	virtual void OnNetMsg(SOCKET cSock,DataHeader* header) {
+		_recvCount++;
+		auto t1 = _tTime.getElapsedSecond();
+		if (t1 >= 1.0)
+		{
+
+			printf("time<%lf>\t连接数 = <%d>\t_recvCount<%d>\n",t1,_clients.size(),_recvCount);
+			_recvCount = 0;
+			_tTime.updata();
+		}
+		
 		switch (header->cmd)
 		{
 		case CMD_LOGIN:
@@ -303,7 +319,7 @@ public:
 			//printf("收到客户端<Scoket = %d>请求：CMD_LOGIN 数据长度: %d  userName = %s PassWord = % s\n", _cSock, login->dataLength, login->UserName, login->PassWord);
 			//忽略判断用户密码是否正确的过程
 			LoginResult ret;
-			SendData(cSock, &ret);
+			//SendData(cSock, &ret);
 
 		}
 		break;
@@ -313,7 +329,7 @@ public:
 			//printf("收到客户端<Scoket = %d>请求:CMD_LOGOUT,数据长度: %d, userName = %s \n", _cSock, logout->dataLength, logout->UserName);
 			//退出登录
 			LogoutResult ret;
-			SendData(cSock, &ret);
+			//SendData(cSock, &ret);
 
 		}
 		break;

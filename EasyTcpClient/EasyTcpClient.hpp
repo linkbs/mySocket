@@ -121,7 +121,7 @@ public:
 			if (ret < 0)
 			{
 				printf("<socket=%d>select任务结束", _sock);
-				return false;
+	
 			}
 			if (FD_ISSET(_sock, &fdReads))
 			{
@@ -144,7 +144,7 @@ public:
 		return _sock != INVALID_SOCKET;
 	}
 	
-#define RECV_BUFF_SIZE 10240
+#define RECV_BUFF_SIZE 1024
 	//接收缓冲区
 	char _szRecv[RECV_BUFF_SIZE] = {};
 	//第二缓冲区，用来存放接收缓冲区的数据

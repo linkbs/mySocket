@@ -28,12 +28,26 @@ void cmdThread()
 int main() 
 {
  
-    const int cCount = 63;
+    const int cCount = 2000;
     EasyTcpClient* client[cCount];
     //client.initSocket();创建新sock时使用
     for (int i = 0;i < cCount;i++)
     {
+        if (!g_bRun) 
+        {
+            return 0;
+        
+        }
         client[i] = new EasyTcpClient();
+
+    }
+    for (int i = 0;i < cCount;i++)
+    {
+        if (!g_bRun)
+        {
+            return 0;
+
+        }
         client[i]->Connect("127.0.0.1", 4567);
 
     }
@@ -47,9 +61,15 @@ int main()
     while (g_bRun)
     {
         for (int i = 0;i < cCount;i++) {
-             client[i]->OnRun();
+             
+            if (!g_bRun) 
+            {
+            
+                return 0;
+            }
             //printf("空闲时间处理其他业务..\n");
              client[i]->SendData(&login);
+             //client[i]->OnRun();
         }
     }
 

@@ -28,8 +28,6 @@ int main() {
     server.InitSocket();
     server.Bind(nullptr, 4567);
     server.Listen(5);
-    DataHeader header;
-    LoginResult rlogin;
 
     std::thread t1(cmdThread);
     t1.detach();
@@ -37,7 +35,7 @@ int main() {
     {
    
         server.OnRun();
-        server.SendDataAll(&rlogin);
+       
        //printf("空闲时间，处理其他业务\n");
         
 
