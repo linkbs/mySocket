@@ -28,7 +28,6 @@ class EasyTcpClient
 public:
 	EasyTcpClient() 
 	{
-	   
 		_sock = INVALID_SOCKET;
 	
 	}
@@ -51,12 +50,12 @@ public:
 
 		 if (INVALID_SOCKET == _sock) 
 		 {
-			 printf("错误，建立Socket失败....\n");
+			 //printf("错误，建立Socket失败....\n");
 			 Close();
 		 }
 		 else {
-		 
-			 printf("建立Socket成功...\n");
+
+			 //printf("建立Socket成功...\n");
 		 }
 	
 	}
@@ -81,10 +80,10 @@ public:
 		int ret = connect(_sock, (sockaddr*)&_sin, sizeof(sockaddr_in));
 		if (SOCKET_ERROR == ret)
 		{
-			printf("错误，建立Socket失败....\n");
+			//printf("错误，建立Socket失败....\n");
 		}
 		else {
-			printf("正确，建立Socket成功.....\n");
+			//printf("正确，建立Socket成功.....\n");
 
 		}
 		return ret;
@@ -238,11 +237,11 @@ public:
 	
 	}
 	//发送数据
-	int SendData(DataHeader* header) 
+	int SendData(DataHeader* header,int nLen) 
 	{
 		if (isRun() && header) {
 
-		   send(_sock, (const char*)header, header->dataLength, 0);
+		   send(_sock, (const char*)header, nLen, 0);
 		}
 		return SOCKET_ERROR;
 	}
